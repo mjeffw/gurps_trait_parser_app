@@ -70,11 +70,10 @@ class _ModelBindingScope<T> extends InheritedWidget {
 class TraitModel {
   final String text;
 
-  TraitModel({String text})
-      : text = (text == null || text.isEmpty) ? '' : StringEx.toTitleCase(text);
+  TraitModel({String text}) : text = (text == null || text.isEmpty) ? '' : text;
 
   factory TraitModel.replaceText(TraitModel trait, {String text}) {
-    return TraitModel(text: text ?? trait.text);
+    return (trait.text == text) ? trait : TraitModel(text: text ?? trait.text);
   }
 
   @override

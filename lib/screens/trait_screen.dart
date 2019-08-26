@@ -8,9 +8,14 @@ class TraitScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ModelBinding(
-      model: TraitModel(),
-      child: _TraitScreen(),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _TraitScreen(),
+        ],
+      ),
     );
   }
 }
@@ -18,22 +23,9 @@ class TraitScreen extends StatelessWidget {
 class _TraitScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final TraitModel trait = TraitModel.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('GURPS Trait Parser'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            TraitForm(trait: trait),
-          ],
-        ),
-      ),
-    );
+    final TraitModel trait = ModelBinding.of(context);
+    print('_TraitScreen.build');
+    return TraitForm(trait: trait);
   }
 }
 
@@ -55,11 +47,14 @@ class TraitForm extends StatefulWidget {
 class _TraitFormState extends State<TraitForm> {
   TextEditingController _textController = TextEditingController();
 
-  // _TraitFormState();
+  _TraitFormState() {
+    print('_TraitFormState');
+  }
 
   @override
   void dispose() {
     _textController.dispose();
+    print('dispose');
     super.dispose();
   }
 
@@ -67,16 +62,27 @@ class _TraitFormState extends State<TraitForm> {
   void initState() {
     print('initState');
     super.initState();
-    setState(() {
-      _textController.text = widget.trait.text;
-    });
+    _textController.text = widget.trait.text;
+    _textController.addListener(_handleUpdate);
   }
 
-  @override
-  void didUpdateWidget(TraitForm oldWidget) {
-    print('didUpdateWidget');
-    super.didUpdateWidget(oldWidget);
-    _textController.text = widget.trait.text;
+  // @override
+  // void didUpdateWidget(TraitForm oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   if (_textController.text != widget.trait.text) {
+  //     print('didUpdateWidget: ${widget.trait.text}');
+  //     _textController.text = widget.trait.text;
+  //   }
+  // }
+
+  void _handleUpdate() {
+    var traitModel =
+        TraitModel.replaceText(widget.trait, text: _textController.text);
+    ModelBinding.update(context, traitModel);
+    if (_textController.text != traitModel.text) {
+      print('changed: [${_textController.text}] to [${traitModel.text}]');
+      _textController.text = traitModel.text;
+    }
   }
 
   @override
@@ -99,10 +105,14 @@ class _TraitFormState extends State<TraitForm> {
       maxLines: 5,
       decoration: inputDecoration,
       controller: _textController,
-      onChanged: (text) {
-        TraitModel.update(
-            context, TraitModel.replaceText(widget.trait, text: text));
-      },
+      // onChanged: (text) {
+      //   print('changed:  ${_textController.text}');
+      //   var traitModel = TraitModel.replaceText(widget.trait, text: text);
+      //   ModelBinding.update(context, traitModel);
+      //   setState(() {
+      //     _textController.text = traitModel.text;
+      //   });
+      // },
     );
   }
 }
