@@ -47,40 +47,27 @@ class TraitForm extends StatefulWidget {
 class _TraitFormState extends State<TraitForm> {
   TextEditingController _textController = TextEditingController();
 
-  _TraitFormState() {
-    print('_TraitFormState');
-  }
+  _TraitFormState();
 
   @override
   void dispose() {
     _textController.dispose();
-    print('dispose');
     super.dispose();
   }
 
   @override
   void initState() {
-    print('initState');
     super.initState();
     _textController.text = widget.trait.text;
     _textController.addListener(_handleUpdate);
   }
 
-  // @override
-  // void didUpdateWidget(TraitForm oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   if (_textController.text != widget.trait.text) {
-  //     print('didUpdateWidget: ${widget.trait.text}');
-  //     _textController.text = widget.trait.text;
-  //   }
-  // }
-
   void _handleUpdate() {
     var traitModel =
         TraitModel.replaceText(widget.trait, text: _textController.text);
     ModelBinding.update(context, traitModel);
+
     if (_textController.text != traitModel.text) {
-      print('changed: [${_textController.text}] to [${traitModel.text}]');
       _textController.text = traitModel.text;
     }
   }
@@ -102,17 +89,6 @@ class _TraitFormState extends State<TraitForm> {
         ));
 
     return TextField(
-      maxLines: 5,
-      decoration: inputDecoration,
-      controller: _textController,
-      // onChanged: (text) {
-      //   print('changed:  ${_textController.text}');
-      //   var traitModel = TraitModel.replaceText(widget.trait, text: text);
-      //   ModelBinding.update(context, traitModel);
-      //   setState(() {
-      //     _textController.text = traitModel.text;
-      //   });
-      // },
-    );
+        maxLines: 5, decoration: inputDecoration, controller: _textController);
   }
 }
