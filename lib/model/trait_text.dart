@@ -70,13 +70,14 @@ class _ModelBindingScope<T> extends InheritedWidget {
 Parser parser = Parser();
 
 class TraitModel {
-  String get text => _text;
   final String _text;
-  final List<TraitComponents> components;
+  final List<Trait> traits;
+
+  String get text => _text;
 
   TraitModel({String text})
       : _text = text ?? '',
-        this.components = parser.tryParse(text ?? '');
+        traits = _createTrait(text ?? '');
 
   factory TraitModel.replaceText(TraitModel trait, {String text}) {
     return (trait.text == text) ? trait : TraitModel(text: text ?? trait.text);
@@ -92,3 +93,15 @@ class TraitModel {
   @override
   int get hashCode => text.hashCode;
 }
+
+List<Trait> _createTrait(String text) {
+  try {
+    List<TraitComponents> components = Parser().parse(text);
+    return components.map((it) => _buildTrait(it)).toList();
+  } catch (exc) {
+    return [];
+  }
+}
+
+// TODO update Traits.buildTrait to return a shell trait if the template is not found
+Trait _buildTrait(TraitComponents it) => Traits.buildTrait(it);

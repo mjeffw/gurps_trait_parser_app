@@ -1,5 +1,6 @@
 import 'package:flutter_web/material.dart';
 import 'package:flutter_web/widgets.dart';
+import 'package:gurps_traits/gurps_traits.dart';
 
 import '../model/trait_text.dart';
 import '../theme.dart' as theme;
@@ -9,16 +10,14 @@ class TraitScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TraitModel trait = ModelBinding.of(context);
+    final TraitModel model = ModelBinding.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Trait',
-          style: theme.titleStyle,
-        ),
-        _TraitText(trait: trait),
+        Text('Trait', style: theme.titleStyle),
+        _TraitText(trait: model),
+        if (model.traits != null && model.traits.isNotEmpty) _ComponentList()
       ],
     );
   }
@@ -77,6 +76,41 @@ class _TraitTextState extends State<_TraitText> {
           helperText:
               'A trait description in canonical GURPS format: Name {Level} (Parenthetical-Notes)',
           labelText: 'Trait Description'),
+    );
+  }
+}
+
+class _ComponentList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final TraitModel model = ModelBinding.of(context);
+    final List<Trait> components = model.traits;
+    return Column(
+      children: <Widget>[
+        Divider(),
+        ...?components.where((v) => v != null).map((it) => _TraitCard(it)),
+      ],
+    );
+  }
+}
+
+class _TraitCard extends StatelessWidget {
+  final Trait trait;
+
+  _TraitCard(this.trait);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(4.0),
+      child: Column(
+        children: <Widget>[
+          Text(trait.description ?? ''),
+          Text(trait.reference ?? ''),
+          Text(trait.specialization ?? ''),
+          Text(trait.baseCost.toString() ?? ''),
+        ],
+      ),
     );
   }
 }
