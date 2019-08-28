@@ -2,52 +2,47 @@ import 'package:flutter_web/material.dart';
 import 'package:flutter_web/widgets.dart';
 
 import '../model/trait_text.dart';
+import '../theme.dart' as theme;
 
 class TraitScreen extends StatelessWidget {
   static const String id = "trait_screen";
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _TraitScreen(),
-        ],
-      ),
-    );
-  }
-}
-
-class _TraitScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
     final TraitModel trait = ModelBinding.of(context);
-    print('_TraitScreen.build');
-    return TraitForm(trait: trait);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Trait',
+          style: theme.titleStyle,
+        ),
+        _TraitText(trait: trait),
+      ],
+    );
   }
 }
 
 ///
 /// TraitForm
 ///
-class TraitForm extends StatefulWidget {
+class _TraitText extends StatefulWidget {
   final TraitModel trait;
 
-  TraitForm({Key key, @required this.trait}) : super(key: key);
+  _TraitText({Key key, @required this.trait}) : super(key: key);
 
   @override
-  _TraitFormState createState() => _TraitFormState();
+  _TraitTextState createState() => _TraitTextState();
 }
 
 ///
 /// State.
 ///
-class _TraitFormState extends State<TraitForm> {
+class _TraitTextState extends State<_TraitText> {
   TextEditingController _textController = TextEditingController();
 
-  _TraitFormState();
+  _TraitTextState();
 
   @override
   void dispose() {
@@ -74,21 +69,14 @@ class _TraitFormState extends State<TraitForm> {
 
   @override
   Widget build(BuildContext context) {
-    var inputDecoration = InputDecoration(
-        filled: true,
-        contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.lightBlueAccent, width: 1.0),
-          borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.lightBlueAccent, width: 2.0),
-        ));
-
     return TextField(
-        maxLines: 5, decoration: inputDecoration, controller: _textController);
+      maxLines: 5,
+      controller: _textController,
+      decoration: InputDecoration(
+          alignLabelWithHint: true,
+          helperText:
+              'A trait description in canonical GURPS format: Name {Level} (Parenthetical-Notes)',
+          labelText: 'Trait Description'),
+    );
   }
 }

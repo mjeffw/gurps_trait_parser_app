@@ -1,5 +1,5 @@
-import 'package:dart_utils/dart_util.dart';
 import 'package:flutter_web/widgets.dart';
+import 'package:gurps_traits/gurps_traits.dart';
 
 class ModelBinding<T> extends StatefulWidget {
   ModelBinding({
@@ -67,10 +67,16 @@ class _ModelBindingScope<T> extends InheritedWidget {
   bool updateShouldNotify(_ModelBindingScope oldWidget) => true;
 }
 
-class TraitModel {
-  final String text;
+Parser parser = Parser();
 
-  TraitModel({String text}) : text = (text == null || text.isEmpty) ? '' : text;
+class TraitModel {
+  String get text => _text;
+  final String _text;
+  final List<TraitComponents> components;
+
+  TraitModel({String text})
+      : _text = text ?? '',
+        this.components = parser.tryParse(text ?? '');
 
   factory TraitModel.replaceText(TraitModel trait, {String text}) {
     return (trait.text == text) ? trait : TraitModel(text: text ?? trait.text);
