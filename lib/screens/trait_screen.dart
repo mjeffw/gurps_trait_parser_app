@@ -105,10 +105,24 @@ class _TraitCard extends StatelessWidget {
       margin: EdgeInsets.all(4.0),
       child: Column(
         children: <Widget>[
-          Text(trait.description ?? ''),
-          Text(trait.reference ?? ''),
-          Text(trait.specialization ?? ''),
-          Text(trait.baseCost.toString() ?? ''),
+          ListTile(
+            title: Text(trait.description ?? ''),
+            subtitle: Text(
+                '${trait.reference ?? ""} ${trait.specialization ?? ""} [${trait.baseCost ?? 0}]'),
+            isThreeLine: false,
+          ),
+          Divider(),
+          ...?trait.modifiers.map(
+            (it) => ListTile(
+              dense: true,
+              title: Text(it.name),
+              subtitle: Text(it.detail == it.name ? "" : it.detail),
+              trailing: Text(
+                  '${it.value < 0 ? it.value : "+" + it.value.toString()}%'),
+            ),
+          ),
+          Divider(),
+          Text('Total cost: ${trait.cost}')
         ],
       ),
     );

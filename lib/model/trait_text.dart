@@ -76,7 +76,9 @@ class TraitModel {
   String get text => _text;
 
   TraitModel({String text})
-      : _text = text ?? '',
+      : _text = text ??
+            // '',
+            'Affliction 1 (Will; Based on Will, +20%; Disadvantage, Berserk, +10%; Fixed Duration, +0%; Malediction 2, +150%; No Signature, +20%; Runecasting, −30%) [27].',
         traits = _createTrait(text ?? '');
 
   factory TraitModel.replaceText(TraitModel trait, {String text}) {
