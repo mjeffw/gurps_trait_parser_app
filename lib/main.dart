@@ -1,12 +1,10 @@
-import 'package:flutter_web/material.dart';
+import 'package:flutter/material.dart';
 
 import 'model/trait_text.dart';
 import 'screens/trait_screen.dart';
 import 'theme.dart' as theme;
 
-void main() {
-  runApp(TraitParserApp());
-}
+void main() => runApp(TraitParserApp());
 
 class TraitParserApp extends StatelessWidget {
   @override
@@ -15,10 +13,13 @@ class TraitParserApp extends StatelessWidget {
       theme: theme.gurpsTheme,
       title: 'GURPS Trait Parser',
       home: ModelBinding<TraitModel>(
-          initialModel: TraitModel(),
+        initialModel: TraitModel(),
+        child: SafeArea(
           child: Scaffold(
             body: TraitScreen(),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

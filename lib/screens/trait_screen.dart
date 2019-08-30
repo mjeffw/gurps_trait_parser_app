@@ -1,9 +1,7 @@
-import 'package:flutter_web/material.dart';
-import 'package:flutter_web/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:gurps_traits/gurps_traits.dart';
 
 import '../model/trait_text.dart';
-import '../theme.dart' as theme;
 
 class TraitScreen extends StatelessWidget {
   static const String id = "trait_screen";
@@ -11,16 +9,32 @@ class TraitScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TraitModel model = ModelBinding.of(context);
+
+    if (_hasTraits(model)) {
+      print(model.traits.length);
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Trait', style: theme.titleStyle),
+        Text(''),
         _TraitText(trait: model),
-        if (model.traits != null && model.traits.isNotEmpty) _ComponentList()
+        if (_hasTraits(model)) Divider(),
+        if (_hasTraits(model))
+          Flexible(
+            fit: FlexFit.loose,
+            child: ListView.builder(
+                itemCount: model.traits.length,
+                itemBuilder: (context, index) =>
+                    _TraitCard(model.traits[index])),
+          ),
       ],
     );
   }
+
+  bool _hasTraits(TraitModel model) =>
+      model.traits != null && model.traits.isNotEmpty;
 }
 
 ///
@@ -74,22 +88,8 @@ class _TraitTextState extends State<_TraitText> {
       decoration: InputDecoration(
           alignLabelWithHint: true,
           helperText:
-              'A trait description in canonical GURPS format: Name {Level} (Parenthetical-Notes)',
+              'A trait in canonical format: Name {Level} (Parenthetical-Notes)',
           labelText: 'Trait Description'),
-    );
-  }
-}
-
-class _ComponentList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final TraitModel model = ModelBinding.of(context);
-    final List<Trait> components = model.traits;
-    return Column(
-      children: <Widget>[
-        Divider(),
-        ...?components.where((v) => v != null).map((it) => _TraitCard(it)),
-      ],
     );
   }
 }

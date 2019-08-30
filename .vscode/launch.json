@@ -5,8 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Dart",
+            "name": "Flutter Web",
             "program": "web/main.dart",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "Flutter",
             "request": "launch",
             "type": "dart"
         }
