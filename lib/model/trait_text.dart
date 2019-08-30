@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter_web/widgets.dart';
 import 'package:gurps_traits/gurps_traits.dart';
 
 class ModelBinding<T> extends StatefulWidget {

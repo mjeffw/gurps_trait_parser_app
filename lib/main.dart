@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_web/material.dart';
 
 import 'model/trait_text.dart';
 import 'screens/trait_screen.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_web/material.dart';
 import 'package:gurps_traits/gurps_traits.dart';
 
 import '../model/trait_text.dart';
@@ -23,7 +23,6 @@ class TraitScreen extends StatelessWidget {
         if (_hasTraits(model)) Divider(),
         if (_hasTraits(model))
           Flexible(
-            fit: FlexFit.loose,
             child: ListView.builder(
                 itemCount: model.traits.length,
                 itemBuilder: (context, index) =>
