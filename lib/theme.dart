@@ -1,6 +1,7 @@
-import 'package:flutter_web/material.dart';
+import 'package:flutter/material.dart';
 
 var gurpsTheme = ThemeData(
+  fontFamily: 'Muli',
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
     contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),

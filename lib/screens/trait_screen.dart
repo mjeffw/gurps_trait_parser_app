@@ -1,4 +1,4 @@
-import 'package:flutter_web/material.dart';
+import 'package:flutter/material.dart';
 import 'package:gurps_traits/gurps_traits.dart';
 
 import '../model/trait_text.dart';
@@ -105,7 +105,7 @@ class _TraitCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           ListTile(
-            title: Text(trait.description ?? ''),
+            title: Text(trait.name ?? ''),
             subtitle: Text(
                 '${trait.reference ?? ""} ${trait.specialization ?? ""} [${trait.baseCost ?? 0}]'),
             isThreeLine: false,
