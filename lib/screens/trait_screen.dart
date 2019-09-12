@@ -11,14 +11,18 @@ class TraitScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TraitModel model = ModelBinding.of(context);
-    print('TraitScreen.build');
+
     return Container(
       padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _TraitText(trait: model),
+          IndexedStack(
+            index: model.isParsed ? 1 : 0,
+            children: [
+              _TraitTextView(),
+              _TraitTextEditor(trait: model),
+            ],
+          ),
           IconButton(
             icon: Icon(
               Icons.swap_vertical_circle,
@@ -27,17 +31,25 @@ class TraitScreen extends StatelessWidget {
             iconSize: 48.0,
             onPressed: () => _toggleParsing(context, model),
           ),
-          if (_hasTraits(model)) Divider(),
-          if (_hasTraits(model))
-            Flexible(
-              child: ListView.builder(
-                  itemCount: model.traits.length,
-                  itemBuilder: (context, index) =>
-                      _TraitCard(model.traits[index], !model.isParsed)),
-            ),
+          ..._traitComponents(context, model),
         ],
       ),
     );
+  }
+
+  List<Widget> _traitComponents(BuildContext context, TraitModel model) {
+    return _hasTraits(model)
+        ? [
+            Divider(),
+            Flexible(
+              child: ListView.builder(
+                itemCount: model.traits.length,
+                itemBuilder: (context, index) =>
+                    _TraitCard(model.traits[index], !model.isParsed),
+              ),
+            )
+          ]
+        : [];
   }
 
   bool _hasTraits(TraitModel model) =>
@@ -49,27 +61,35 @@ class TraitScreen extends StatelessWidget {
   }
 }
 
+class _TraitTextView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final TraitModel model = ModelBinding.of(context);
+    final TextEditingController controller =
+        TextEditingController(text: model.parsedText);
+    return buildTextField(controller: controller, enabled: false);
+  }
+}
+
 ///
 /// TraitForm
 ///
-class _TraitText extends StatefulWidget {
+class _TraitTextEditor extends StatefulWidget {
   final TraitModel trait;
 
-  _TraitText({Key key, @required this.trait}) : super(key: key) {
-    print('create _TraitText');
-  }
+  _TraitTextEditor({Key key, @required this.trait}) : super(key: key);
 
   @override
-  _TraitTextState createState() => _TraitTextState();
+  _TraitTextEditorState createState() => _TraitTextEditorState();
 }
 
 ///
 /// State.
 ///
-class _TraitTextState extends State<_TraitText> {
+class _TraitTextEditorState extends State<_TraitTextEditor> {
   TextEditingController _textController = TextEditingController();
 
-  _TraitTextState();
+  _TraitTextEditorState();
 
   @override
   void dispose() {
@@ -79,46 +99,43 @@ class _TraitTextState extends State<_TraitText> {
 
   @override
   void initState() {
-    print('_TraitTextState.initState');
     super.initState();
-
-    _textController.text = widget.trait.text;
+    _textController.text = widget.trait.rawText;
     _textController.addListener(_handleUpdate);
   }
 
   @override
   void didUpdateWidget(Widget oldWidget) {
-    print('_TraitTextState.didUpdateWidget');
     super.didUpdateWidget(oldWidget);
-    var traitModel =
-        TraitModel.replaceText(widget.trait, text: _textController.text);
-    ModelBinding.update(context, traitModel);
+    ModelBinding.update(context,
+        TraitModel.replaceText(widget.trait, text: _textController.text));
   }
 
   void _handleUpdate() {
-    print('_TraitTextState.handleUpdate');
     var traitModel =
         TraitModel.replaceText(widget.trait, text: _textController.text);
     ModelBinding.update(context, traitModel);
 
-    if (_textController.text != traitModel.text) {
-      _textController.text = traitModel.text;
+    if (_textController.text != traitModel.rawText && traitModel.isParsed) {
+      _textController.text = traitModel.rawText;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('_TraitTextState.build');
-    return TextField(
-      enabled: widget.trait.isParsed,
-      maxLines: 5,
-      controller: _textController,
-      decoration: InputDecoration(
-          alignLabelWithHint: true,
-          helperText: 'Use canonical form: Name {Level} (Parenthetical-Notes).',
-          labelText: 'Trait Description'),
-    );
+    return buildTextField(controller: _textController, enabled: true);
   }
+}
+
+TextField buildTextField({TextEditingController controller, bool enabled}) {
+  return TextField(
+    enabled: enabled,
+    maxLines: 5,
+    controller: controller,
+    decoration: InputDecoration(
+        helperText: 'Use canonical form: Name {Level} (Parenthetical-Notes).',
+        labelText: 'Trait Description'),
+  );
 }
 
 class _TraitCard extends StatelessWidget {
@@ -129,18 +146,17 @@ class _TraitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var detail =
+        '${trait.reference ?? ""} ${trait.specialization ?? ""} [${trait.baseCost ?? 0}]';
+
     return Card(
-      margin: EdgeInsets.all(4.0),
-      shape: focused ? focusedBorder : Theme.of(context).cardTheme.shape,
+      shape: _selectBorder(context),
       child: Column(
         children: <Widget>[
           ListTile(
             title: Text(trait.name ?? ''),
-            subtitle: Text(
-                '${trait.reference ?? ""} ${trait.specialization ?? ""} [${trait.baseCost ?? 0}]'),
+            subtitle: Text(detail),
             trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text('Total Cost', style: smallLabelStyle),
                 Text('${trait.cost}', style: largeLabelStyle)
@@ -153,6 +169,9 @@ class _TraitCard extends StatelessWidget {
       ),
     );
   }
+
+  ShapeBorder _selectBorder(BuildContext context) =>
+      focused ? focusedBorder : Theme.of(context).cardTheme.shape;
 
   List<Widget> _buildAllModifierWidgets(BuildContext context) {
     return trait.modifiers.map((it) => buildListTile(context, it)).toList();

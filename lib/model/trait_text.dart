@@ -74,7 +74,11 @@ class TraitModel {
   final List<Trait> traits;
   final bool isParsed;
 
-  String get text => _text;
+  String get rawText => _text;
+
+  String get parsedText {
+    return traits.map((it) => it.description).join(' + ');
+  }
 
   TraitModel({String text, bool isParsed})
       : _text = text ?? '',
@@ -82,26 +86,26 @@ class TraitModel {
         isParsed = isParsed ?? true;
 
   factory TraitModel.replaceText(TraitModel trait, {String text}) {
-    return (trait.text == text)
+    return (trait.rawText == text)
         ? trait
-        : TraitModel(text: text ?? trait.text, isParsed: trait.isParsed);
+        : TraitModel(text: text ?? trait.rawText, isParsed: trait.isParsed);
   }
 
   factory TraitModel.toggleParsing(TraitModel trait, {bool isParsed}) {
     return (trait.isParsed == isParsed)
         ? trait
-        : TraitModel(text: trait.text, isParsed: isParsed);
+        : TraitModel(text: trait.rawText, isParsed: isParsed);
   }
 
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != this.runtimeType) return false;
-    return this.text == other.text && this.isParsed == other.isParsed;
+    return this.rawText == other.rawText && this.isParsed == other.isParsed;
   }
 
   @override
-  int get hashCode => text.hashCode ^ isParsed.hashCode;
+  int get hashCode => rawText.hashCode ^ isParsed.hashCode;
 }
 
 List<Trait> _createTrait(String text) {

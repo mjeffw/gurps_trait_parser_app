@@ -7,9 +7,11 @@ import 'theme.dart' as theme;
 void main() => runApp(TraitParserApp());
 
 class TraitParserApp extends StatelessWidget {
-  TraitModel model = TraitModel(
+  final TraitModel model = TraitModel(
       text:
-          'Affliction 1 (Will; Based on Will, +20%; Disadvantage, Berserk, +10%; Fixed Duration, +0%; Malediction 2, +150%; No Signature, +20%; Runecasting, −30%) [27].');
+          'Affliction 1 (Will; Based on Will, +20%; Disadvantage, Berserk, +10%;'
+          ' Fixed Duration, +0%; Malediction 2, +150%; No Signature, +20%; '
+          'Runecasting, −30%) [27].');
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,6 @@ class TraitParserApp extends StatelessWidget {
             child: TraitScreen(),
           ),
           bottomNavigationBar: BottomAppBar(
-            shape: const CircularNotchedRectangle(),
             child: Container(
               height: 50.0,
             ),
