@@ -72,28 +72,36 @@ Parser parser = Parser();
 class TraitModel {
   final String _text;
   final List<Trait> traits;
+  final bool isParsed;
 
   String get text => _text;
 
-  TraitModel({String text})
-      : _text = text ??
-            // '',
-            'Affliction 1 (Will; Based on Will, +20%; Disadvantage, Berserk, +10%; Fixed Duration, +0%; Malediction 2, +150%; No Signature, +20%; Runecasting, −30%) [27].',
-        traits = _createTrait(text ?? '');
+  TraitModel({String text, bool isParsed})
+      : _text = text ?? '',
+        traits = _createTrait(text ?? ''),
+        isParsed = isParsed ?? true;
 
   factory TraitModel.replaceText(TraitModel trait, {String text}) {
-    return (trait.text == text) ? trait : TraitModel(text: text ?? trait.text);
+    return (trait.text == text)
+        ? trait
+        : TraitModel(text: text ?? trait.text, isParsed: trait.isParsed);
+  }
+
+  factory TraitModel.toggleParsing(TraitModel trait, {bool isParsed}) {
+    return (trait.isParsed == isParsed)
+        ? trait
+        : TraitModel(text: trait.text, isParsed: isParsed);
   }
 
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != this.runtimeType) return false;
-    return this.text == other.text;
+    return this.text == other.text && this.isParsed == other.isParsed;
   }
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => text.hashCode ^ isParsed.hashCode;
 }
 
 List<Trait> _createTrait(String text) {
