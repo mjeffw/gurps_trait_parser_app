@@ -174,12 +174,15 @@ class _TraitCard extends StatelessWidget {
       focused ? focusedBorder : Theme.of(context).cardTheme.shape;
 
   List<Widget> _buildAllModifierWidgets(BuildContext context) {
+    List<ModifierComponents> mods = trait.modifiers;
+    mods.sort((a, b) => a.description.compareTo(b.description));
     return trait.modifiers.map((it) => buildListTile(context, it)).toList();
   }
 
   Widget buildListTile(BuildContext context, ModifierComponents it) {
     var data =
-        '${it.detail == it.name ? "" : it.detail + ", "}${it.value < 0 ? it.value : "+" + it.value.toString()}%';
+        '${it.detail.isEmpty ? "" : it.detail + ", "}'
+        '${it.value < 0 ? it.value : "+" + it.value.toString()}%';
 
     return Slidable(
       actionExtentRatio: 0.2,
