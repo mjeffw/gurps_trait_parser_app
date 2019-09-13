@@ -10,7 +10,7 @@ class TraitScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TraitModel model = ModelBinding.of(context);
+    final CompositeTrait model = ModelBinding.of(context);
 
     return Container(
       padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
@@ -37,7 +37,7 @@ class TraitScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _traitComponents(BuildContext context, TraitModel model) {
+  List<Widget> _traitComponents(BuildContext context, CompositeTrait model) {
     return _hasTraits(model)
         ? [
             Divider(),
@@ -52,11 +52,12 @@ class TraitScreen extends StatelessWidget {
         : [];
   }
 
-  bool _hasTraits(TraitModel model) =>
+  bool _hasTraits(CompositeTrait model) =>
       model.traits != null && model.traits.isNotEmpty;
 
-  _toggleParsing(BuildContext context, TraitModel model) {
-    var traitModel = TraitModel.toggleParsing(model, isParsed: !model.isParsed);
+  _toggleParsing(BuildContext context, CompositeTrait model) {
+    var traitModel =
+        CompositeTrait.copyWithText(model, isParsed: !model.isParsed);
     ModelBinding.update(context, traitModel);
   }
 }
@@ -64,7 +65,7 @@ class TraitScreen extends StatelessWidget {
 class _TraitTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final TraitModel model = ModelBinding.of(context);
+    final CompositeTrait model = ModelBinding.of(context);
     final TextEditingController controller =
         TextEditingController(text: model.parsedText);
     return buildTextField(controller: controller, enabled: false);
@@ -75,7 +76,7 @@ class _TraitTextView extends StatelessWidget {
 /// TraitForm
 ///
 class _TraitTextEditor extends StatefulWidget {
-  final TraitModel trait;
+  final CompositeTrait trait;
 
   _TraitTextEditor({Key key, @required this.trait}) : super(key: key);
 
@@ -105,15 +106,24 @@ class _TraitTextEditorState extends State<_TraitTextEditor> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // _textController.removeListener(_handleUpdate);
+    // _textController.text = widget.trait.rawText;
+    // _textController.addListener(_handleUpdate);
+  }
+
+  @override
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    ModelBinding.update(context,
-        TraitModel.replaceText(widget.trait, text: _textController.text));
+    // _textController.text = widget.trait.rawText;
+    // ModelBinding.update(context,
+    //     CompositeTrait.copyWithText(widget.trait, text: _textController.text));
   }
 
   void _handleUpdate() {
     var traitModel =
-        TraitModel.replaceText(widget.trait, text: _textController.text);
+        CompositeTrait.copyWithText(widget.trait, text: _textController.text);
     ModelBinding.update(context, traitModel);
 
     if (_textController.text != traitModel.rawText && traitModel.isParsed) {
@@ -179,19 +189,21 @@ class _TraitCard extends StatelessWidget {
     return trait.modifiers.map((it) => buildListTile(context, it)).toList();
   }
 
-  Widget buildListTile(BuildContext context, ModifierComponents it) {
-    var data =
-        '${it.detail.isEmpty ? "" : it.detail + ", "}'
-        '${it.value < 0 ? it.value : "+" + it.value.toString()}%';
+  Widget buildListTile(BuildContext context, ModifierComponents modifier) {
+    final CompositeTrait model = ModelBinding.of(context);
+
+    var data = '${modifier.detail.isEmpty ? "" : modifier.detail + ", "}'
+        '${modifier.value < 0 ? modifier.value : "+" + modifier.value.toString()}%';
 
     return Slidable(
+      enabled: focused,
       actionExtentRatio: 0.2,
       delegate: SlidableStrechDelegate(),
       child: ListTile(
         dense: true,
-        title: Text(it.name),
+        title: Text(modifier.name),
         subtitle: Text(data),
-        trailing: _MoreButton(),
+        trailing: focused ? _MoreButton() : Text(''),
       ),
       actions: <Widget>[
         IconSlideAction(
@@ -202,20 +214,22 @@ class _TraitCard extends StatelessWidget {
           closeOnTap: true,
         ),
         IconSlideAction(
-          caption: 'Delete',
-          color: Colors.red,
-          icon: Icons.delete,
-          closeOnTap: true,
-          onTap: () => _showSnackBar(context, 'Share'),
-        ),
+            caption: 'Delete',
+            color: Colors.red,
+            icon: Icons.delete,
+            closeOnTap: true,
+            onTap: () => ModelBinding.update(
+                context,
+                CompositeTrait.remove(model,
+                    trait: trait, modifier: modifier))),
       ],
     );
   }
 
-  _showSnackBar(BuildContext context, String s) {
-    SnackBar snackBar = SnackBar(content: Text(s));
-    Scaffold.of(context).showSnackBar(snackBar);
-  }
+  // _showSnackBar(BuildContext context, String s) {
+  //   SnackBar snackBar = SnackBar(content: Text(s));
+  //   Scaffold.of(context).showSnackBar(snackBar);
+  // }
 }
 
 class _MoreButton extends StatelessWidget {

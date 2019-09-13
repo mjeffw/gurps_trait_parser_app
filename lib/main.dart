@@ -7,11 +7,11 @@ import 'theme.dart' as theme;
 void main() => runApp(TraitParserApp());
 
 class TraitParserApp extends StatelessWidget {
-  final TraitModel model = TraitModel(
+  final CompositeTrait model = CompositeTrait.fromText(
       text:
           'Affliction 1 (Will; Based on Will, +20%; Disadvantage, Berserk, +10%;'
           ' Fixed Duration, +0%; Malediction 2, +150%; No Signature, +20%; '
-          'Runecasting, −30%) [27].');
+          'Runecasting, -30%) [27].');
 
   @override
   Widget build(BuildContext context) {
@@ -19,26 +19,26 @@ class TraitParserApp extends StatelessWidget {
       theme: theme.gurpsTheme,
       title: 'GURPS Trait Parser',
       home: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('Trait Parser'),
-          ),
-          body: ModelBinding<TraitModel>(
-            initialModel: model,
-            child: TraitScreen(),
-          ),
-          bottomNavigationBar: BottomAppBar(
-            child: Container(
-              height: 50.0,
+        child: ModelBinding<CompositeTrait>(
+          initialModel: model,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text('Trait Parser'),
             ),
+            body: TraitScreen(),
+            bottomNavigationBar: BottomAppBar(
+              child: Container(
+                height: 50.0,
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              tooltip: 'Increment Counter',
+              child: Icon(Icons.add),
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {},
-            tooltip: 'Increment Counter',
-            child: Icon(Icons.add),
-          ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
         ),
       ),
     );

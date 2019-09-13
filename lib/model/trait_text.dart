@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gurps_traits/gurps_traits.dart';
 
@@ -69,43 +70,80 @@ class _ModelBindingScope<T> extends InheritedWidget {
 
 Parser parser = Parser();
 
-class TraitModel {
+class CompositeTrait {
+  static String generateText(List<Trait> traits) =>
+      traits.map((it) => it.description).join(' + ');
+
   final String _text;
   final List<Trait> traits;
   final bool isParsed;
 
   String get rawText => _text;
 
-  String get parsedText {
-    return traits.map((it) => it.description).join(' + ');
-  }
+  String get parsedText => generateText(traits);
 
-  TraitModel({String text, bool isParsed})
+  ///
+  /// Either create a TraitModel given parseable text, or create one from a list
+  /// of traits. You cannot do both.
+  ///
+  CompositeTrait({List<Trait> traits, bool isParsed})
+      : traits = traits ?? [],
+        _text = CompositeTrait.generateText(traits),
+        isParsed = isParsed ?? true;
+
+  factory CompositeTrait.copyWithTraits(CompositeTrait source,
+          {List<Trait> traits, bool isParsed}) =>
+      listEquals(source.traits, traits) && source.isParsed == isParsed
+          ? source
+          : CompositeTrait(
+              isParsed: isParsed ?? source.isParsed, traits: traits ?? []);
+
+  ///
+  /// Either create a TraitModel given parseable text, or create one from a list
+  /// of traits. You cannot do both.
+  ///
+  CompositeTrait.fromText({String text, bool isParsed})
       : _text = text ?? '',
         traits = _createTrait(text ?? ''),
         isParsed = isParsed ?? true;
 
-  factory TraitModel.replaceText(TraitModel trait, {String text}) {
-    return (trait.rawText == text)
-        ? trait
-        : TraitModel(text: text ?? trait.rawText, isParsed: trait.isParsed);
-  }
+  factory CompositeTrait.copyWithText(CompositeTrait source,
+          {String text, bool isParsed}) =>
+      (source.rawText == text && source.isParsed == isParsed)
+          ? source
+          : CompositeTrait.fromText(
+              text: text ?? source._text,
+              isParsed: isParsed ?? source.isParsed);
 
-  factory TraitModel.toggleParsing(TraitModel trait, {bool isParsed}) {
-    return (trait.isParsed == isParsed)
-        ? trait
-        : TraitModel(text: trait.rawText, isParsed: isParsed);
+  factory CompositeTrait.remove(CompositeTrait source,
+      {ModifierComponents modifier, Trait trait}) {
+    List<Trait> traits = [];
+    traits.addAll(source.traits);
+    int index = traits.indexOf(trait);
+
+    List<ModifierComponents> mods = []; // create temporary list
+    mods.addAll(
+        trait.modifiers); // copy all elements of trait.modifiers into temp list
+    mods.remove(modifier); // remove the target modifier from temp list
+
+    traits[index] = Trait.copyWith(trait, modifiers: mods);
+
+    CompositeTrait model =
+        CompositeTrait.copyWithTraits(source, traits: traits);
+    return model;
   }
 
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != this.runtimeType) return false;
-    return this.rawText == other.rawText && this.isParsed == other.isParsed;
+    return this.rawText == other.rawText &&
+        this.isParsed == other.isParsed &&
+        listEquals(traits, other.traits);
   }
 
   @override
-  int get hashCode => rawText.hashCode ^ isParsed.hashCode;
+  int get hashCode => rawText.hashCode ^ isParsed.hashCode ^ traits.hashCode;
 }
 
 List<Trait> _createTrait(String text) {
