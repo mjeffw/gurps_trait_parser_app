@@ -56,9 +56,8 @@ class TraitScreen extends StatelessWidget {
       model.traits != null && model.traits.isNotEmpty;
 
   _toggleParsing(BuildContext context, CompositeTrait model) {
-    var traitModel =
-        CompositeTrait.copyWithText(model, isParsed: !model.isParsed);
-    ModelBinding.update(context, traitModel);
+    ModelBinding.update(
+        context, CompositeTrait.copyWithText(model, isParsed: !model.isParsed));
   }
 }
 
@@ -106,17 +105,12 @@ class _TraitTextEditorState extends State<_TraitTextEditor> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // _textController.removeListener(_handleUpdate);
-    // _textController.text = widget.trait.rawText;
-    // _textController.addListener(_handleUpdate);
-  }
-
-  @override
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // _textController.text = widget.trait.rawText;
+    _TraitTextEditor oldEditor = oldWidget as _TraitTextEditor;
+    if (oldEditor.trait.isParsed != widget.trait.isParsed) {
+      _textController.text = widget.trait.rawText;
+    }
     // ModelBinding.update(context,
     //     CompositeTrait.copyWithText(widget.trait, text: _textController.text));
   }
