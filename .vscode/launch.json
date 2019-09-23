@@ -15,7 +15,7 @@
       ]
     },
     {
-      "name": "Flutter mobile",
+      "name": "Flutter iPhone",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",

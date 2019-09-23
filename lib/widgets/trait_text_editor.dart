@@ -49,7 +49,7 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
     TraitTextEditor oldEditor = oldWidget as TraitTextEditor;
     if (oldEditor.trait.isParsed != widget.trait.isParsed) {
       if (widget.trait.isParsed) {
-        print('update widget');
+        print('${widget.trait.parsedText}');
         _textController.removeListener(_handleUpdate);
         _textController.text = widget.trait.parsedText;
         _textController.addListener(_handleUpdate);

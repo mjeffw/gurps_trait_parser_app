@@ -126,7 +126,7 @@ class CompositeTrait {
         trait.modifiers); // copy all elements of trait.modifiers into temp list
     mods.remove(modifier); // remove the target modifier from temp list
 
-    traits[index] = Trait.copyWith(trait, modifiers: mods);
+    traits[index] = trait.copyWith(modifiers: mods);
 
     CompositeTrait model =
         CompositeTrait.copyWithTraits(source, traits: traits);

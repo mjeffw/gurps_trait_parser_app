@@ -66,8 +66,9 @@ class _TraitTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CompositeTrait model = ModelBinding.of(context);
+    final parsedText = model.parsedText;
     final TextEditingController controller =
-        TextEditingController(text: model.parsedText);
+        TextEditingController(text: parsedText);
     return buildTextField(controller: controller, enabled: false);
   }
 }
