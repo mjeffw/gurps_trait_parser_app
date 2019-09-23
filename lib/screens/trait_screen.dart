@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gurps_trait_parser_app/theme.dart';
 import 'package:gurps_traits/gurps_traits.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../model/trait_text.dart';
+import '../widgets/trait_text_editor.dart';
 
 class TraitScreen extends StatelessWidget {
   static const String id = "trait_screen";
@@ -69,77 +70,6 @@ class _TraitTextView extends StatelessWidget {
         TextEditingController(text: model.parsedText);
     return buildTextField(controller: controller, enabled: false);
   }
-}
-
-///
-/// TraitForm
-///
-class _TraitTextEditor extends StatefulWidget {
-  final CompositeTrait trait;
-
-  _TraitTextEditor({Key key, @required this.trait}) : super(key: key);
-
-  @override
-  _TraitTextEditorState createState() => _TraitTextEditorState();
-}
-
-///
-/// State.
-///
-class _TraitTextEditorState extends State<_TraitTextEditor> {
-  TextEditingController _textController = TextEditingController();
-
-  _TraitTextEditorState();
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _textController.text = widget.trait.rawText;
-    _textController.addListener(_handleUpdate);
-  }
-
-  @override
-  void didUpdateWidget(Widget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _TraitTextEditor oldEditor = oldWidget as _TraitTextEditor;
-    if (oldEditor.trait.isParsed != widget.trait.isParsed) {
-      _textController.text = widget.trait.rawText;
-    }
-    // ModelBinding.update(context,
-    //     CompositeTrait.copyWithText(widget.trait, text: _textController.text));
-  }
-
-  void _handleUpdate() {
-    var traitModel =
-        CompositeTrait.copyWithText(widget.trait, text: _textController.text);
-    ModelBinding.update(context, traitModel);
-
-    if (_textController.text != traitModel.rawText && traitModel.isParsed) {
-      _textController.text = traitModel.rawText;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return buildTextField(controller: _textController, enabled: true);
-  }
-}
-
-TextField buildTextField({TextEditingController controller, bool enabled}) {
-  return TextField(
-    enabled: enabled,
-    maxLines: 5,
-    controller: controller,
-    decoration: InputDecoration(
-        helperText: 'Use canonical form: Name {Level} (Parenthetical-Notes).',
-        labelText: 'Trait Description'),
-  );
 }
 
 class _TraitCard extends StatelessWidget {
