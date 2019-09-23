@@ -37,8 +37,10 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
   _TraitTextEditorState();
 
   @override
-  Widget build(BuildContext context) {
-    return buildTextField(controller: _textController, enabled: true);
+  void initState() {
+    super.initState();
+    _textController.text = widget.trait.rawText;
+    _textController.addListener(_handleUpdate);
   }
 
   @override
@@ -46,10 +48,26 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
     super.didUpdateWidget(oldWidget);
     TraitTextEditor oldEditor = oldWidget as TraitTextEditor;
     if (oldEditor.trait.isParsed != widget.trait.isParsed) {
-      _textController.text = widget.trait.rawText;
+      if (widget.trait.isParsed) {
+        print('update widget');
+        _textController.removeListener(_handleUpdate);
+        _textController.text = widget.trait.parsedText;
+        _textController.addListener(_handleUpdate);
+      }
     }
     // ModelBinding.update(context,
     //     CompositeTrait.copyWithText(widget.trait, text: _textController.text));
+  }
+
+  void _handleUpdate() {
+    var traitModel =
+        CompositeTrait.copyWithText(widget.trait, text: _textController.text);
+    ModelBinding.update(context, traitModel);
+
+    if (_textController.text != traitModel.rawText && traitModel.isParsed) {
+      print('handle update');
+      _textController.text = traitModel.rawText;
+    }
   }
 
   @override
@@ -59,19 +77,7 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _textController.text = widget.trait.rawText;
-    _textController.addListener(_handleUpdate);
-  }
-
-  void _handleUpdate() {
-    var traitModel =
-        CompositeTrait.copyWithText(widget.trait, text: _textController.text);
-    ModelBinding.update(context, traitModel);
-
-    if (_textController.text != traitModel.rawText && traitModel.isParsed) {
-      _textController.text = traitModel.rawText;
-    }
+  Widget build(BuildContext context) {
+    return buildTextField(controller: _textController, enabled: true);
   }
 }

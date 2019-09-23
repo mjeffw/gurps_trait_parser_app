@@ -21,7 +21,7 @@ class TraitScreen extends StatelessWidget {
             index: model.isParsed ? 1 : 0,
             children: [
               _TraitTextView(),
-              _TraitTextEditor(trait: model),
+              TraitTextEditor(trait: model),
             ],
           ),
           IconButton(
