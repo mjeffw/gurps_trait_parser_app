@@ -26,8 +26,8 @@ class TraitScreen extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(
-              Icons.swap_vertical_circle,
-              color: Colors.green,
+              model.isParsed ? Icons.arrow_downward : Icons.arrow_upward,
+              color: Colors.blue,
             ),
             iconSize: 48.0,
             onPressed: () => _toggleParsing(context, model),
@@ -45,8 +45,7 @@ class TraitScreen extends StatelessWidget {
             Flexible(
               child: ListView.builder(
                 itemCount: model.traits.length,
-                itemBuilder: (context, index) =>
-                    _TraitCard(model.traits[index], !model.isParsed),
+                itemBuilder: (context, index) => _TraitCard(index),
               ),
             )
           ]
@@ -74,18 +73,20 @@ class _TraitTextView extends StatelessWidget {
 }
 
 class _TraitCard extends StatelessWidget {
-  final Trait trait;
-  final bool focused;
+  final int index;
 
-  _TraitCard(this.trait, this.focused);
+  _TraitCard(this.index);
 
   @override
   Widget build(BuildContext context) {
-    var detail =
+    final CompositeTrait model = ModelBinding.of(context);
+    final focused = !model.isParsed;
+    final trait = model.traits[index];
+    final detail =
         '${trait.reference ?? ""} ${trait.specialization ?? ""} [${trait.baseCost ?? 0}]';
 
     return Card(
-      shape: _selectBorder(context),
+      shape: _selectBorder(context, focused),
       child: Column(
         children: <Widget>[
           ListTile(
@@ -98,32 +99,65 @@ class _TraitCard extends StatelessWidget {
               ],
             ),
           ),
-          Divider(),
-          ...?_buildAllModifierWidgets(context),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              if (!model.isParsed)
+                IconButton(
+                  onPressed: () {
+                    _addEnhancement(model, trait);
+                  },
+                  icon: Icon(
+                    Icons.add_circle,
+                    color: Colors.blue,
+                  ),
+                ),
+              Divider(),
+            ],
+          ),
+          ...?_buildAllModifierWidgets(context, trait, focused),
         ],
       ),
     );
   }
 
-  ShapeBorder _selectBorder(BuildContext context) =>
+  ShapeBorder _selectBorder(BuildContext context, bool focused) =>
       focused ? focusedBorder : Theme.of(context).cardTheme.shape;
 
-  List<Widget> _buildAllModifierWidgets(BuildContext context) {
-    List<ModifierComponents> mods = trait.modifiers;
-    mods.sort((a, b) => a.description.compareTo(b.description));
-    return trait.modifiers.map((it) => buildListTile(context, it)).toList();
+  List<Widget> _buildAllModifierWidgets(
+      BuildContext context, Trait trait, bool focused) {
+    return trait.modifiers
+        .map((it) => ModifierListTile(trait: trait, modifier: it))
+        .toList();
   }
 
-  Widget buildListTile(BuildContext context, ModifierComponents modifier) {
-    final CompositeTrait model = ModelBinding.of(context);
+  void _addEnhancement(CompositeTrait model, Trait trait) {
+    // display add enhancement dialog
+  }
+}
 
-    var data = '${modifier.detail.isEmpty ? "" : modifier.detail + ", "}'
+class ModifierListTile extends StatelessWidget {
+  const ModifierListTile({
+    Key key,
+    @required this.trait,
+    @required this.modifier,
+  }) : super(key: key);
+
+  final Trait trait;
+  final ModifierComponents modifier;
+
+  @override
+  Widget build(BuildContext context) {
+    final CompositeTrait model = ModelBinding.of(context);
+    final focused = !model.isParsed;
+
+    final data = '${modifier.detail.isEmpty ? "" : modifier.detail + ", "}'
         '${modifier.value < 0 ? modifier.value : "+" + modifier.value.toString()}%';
 
     return Slidable(
+      actionPane: SlidableStrechActionPane(),
       enabled: focused,
       actionExtentRatio: 0.2,
-      delegate: SlidableStrechDelegate(),
       child: ListTile(
         dense: true,
         title: Text(modifier.name),
@@ -139,22 +173,20 @@ class _TraitCard extends StatelessWidget {
           closeOnTap: true,
         ),
         IconSlideAction(
-            caption: 'Delete',
-            color: Colors.red,
-            icon: Icons.delete,
-            closeOnTap: true,
-            onTap: () => ModelBinding.update(
-                context,
-                CompositeTrait.remove(model,
-                    trait: trait, modifier: modifier))),
+          caption: 'Delete',
+          color: Colors.red,
+          icon: Icons.delete,
+          closeOnTap: true,
+          onTap: () {
+            ModelBinding.update(
+              context,
+              CompositeTrait.remove(model, trait: trait, modifier: modifier),
+            );
+          },
+        ),
       ],
     );
   }
-
-  // _showSnackBar(BuildContext context, String s) {
-  //   SnackBar snackBar = SnackBar(content: Text(s));
-  //   Scaffold.of(context).showSnackBar(snackBar);
-  // }
 }
 
 class _MoreButton extends StatelessWidget {
@@ -168,7 +200,7 @@ class _MoreButton extends StatelessWidget {
       icon: Icon(Icons.more_vert),
       iconSize: 20.0,
       onPressed: () {
-        Slidable.of(context).open();
+        Slidable.of(context).open(actionType: SlideActionType.primary);
       },
     );
   }
