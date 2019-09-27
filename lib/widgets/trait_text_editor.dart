@@ -47,8 +47,8 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget);
     TraitTextEditor oldEditor = oldWidget as TraitTextEditor;
-    if (oldEditor.trait.isParsed != widget.trait.isParsed) {
-      if (widget.trait.isParsed) {
+    if (oldEditor.trait.isParsingText != widget.trait.isParsingText) {
+      if (widget.trait.isParsingText) {
         print('${widget.trait.parsedText}');
         _textController.removeListener(_handleUpdate);
         _textController.text = widget.trait.parsedText;
@@ -64,7 +64,7 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
         CompositeTrait.copyWithText(widget.trait, text: _textController.text);
     ModelBinding.update(context, traitModel);
 
-    if (_textController.text != traitModel.rawText && traitModel.isParsed) {
+    if (_textController.text != traitModel.rawText && traitModel.isParsingText) {
       print('handle update');
       _textController.text = traitModel.rawText;
     }

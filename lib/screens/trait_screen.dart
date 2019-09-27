@@ -18,7 +18,7 @@ class TraitScreen extends StatelessWidget {
       child: Column(
         children: [
           IndexedStack(
-            index: model.isParsed ? 1 : 0,
+            index: model.isParsingText ? 1 : 0,
             children: [
               _TraitTextView(),
               TraitTextEditor(trait: model),
@@ -26,7 +26,7 @@ class TraitScreen extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(
-              model.isParsed ? Icons.arrow_downward : Icons.arrow_upward,
+              model.isParsingText ? Icons.arrow_downward : Icons.arrow_upward,
               color: Colors.blue,
             ),
             iconSize: 48.0,
@@ -56,8 +56,8 @@ class TraitScreen extends StatelessWidget {
       model.traits != null && model.traits.isNotEmpty;
 
   _toggleParsing(BuildContext context, CompositeTrait model) {
-    ModelBinding.update(
-        context, CompositeTrait.copyWithText(model, isParsed: !model.isParsed));
+    ModelBinding.update(context,
+        CompositeTrait.copyWithText(model, isParsed: !model.isParsingText));
   }
 }
 
@@ -80,18 +80,23 @@ class _TraitCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CompositeTrait model = ModelBinding.of(context);
-    final focused = !model.isParsed;
+    final focused = !model.isParsingText;
     final trait = model.traits[index];
     final detail =
-        '${trait.reference ?? ""} ${trait.specialization ?? ""} [${trait.baseCost ?? 0}]';
+        '${trait.nameAndLevel} (${trait.specialization ?? ""}) [${trait.baseCost ?? 0}]';
 
     return Card(
       shape: _selectBorder(context, focused),
       child: Column(
         children: <Widget>[
           ListTile(
-            title: Text(trait.name ?? ''),
-            subtitle: Text(detail),
+            title: Text(trait.reference ?? ''),
+            subtitle: Text('$detail\nModifier Total: ${trait.modifierTotal}%'),
+            isThreeLine: true,
+            leading: IconButton(
+              icon: Icon(Icons.keyboard_arrow_down),
+              onPressed: () {},
+            ),
             trailing: Column(
               children: <Widget>[
                 Text('Total Cost', style: smallLabelStyle),
@@ -102,7 +107,7 @@ class _TraitCard extends StatelessWidget {
           Stack(
             alignment: Alignment.center,
             children: [
-              if (!model.isParsed)
+              if (!model.isParsingText)
                 IconButton(
                   onPressed: () {
                     _addEnhancement(model, trait);
@@ -115,6 +120,7 @@ class _TraitCard extends StatelessWidget {
               Divider(),
             ],
           ),
+          //   if (isAddingModifier) _addModifierWidget(context, trait);
           ...?_buildAllModifierWidgets(context, trait, focused),
         ],
       ),
@@ -149,7 +155,7 @@ class ModifierListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CompositeTrait model = ModelBinding.of(context);
-    final focused = !model.isParsed;
+    final focused = !model.isParsingText;
 
     final data = '${modifier.detail.isEmpty ? "" : modifier.detail + ", "}'
         '${modifier.value < 0 ? modifier.value : "+" + modifier.value.toString()}%';

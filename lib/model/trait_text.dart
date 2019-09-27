@@ -76,7 +76,7 @@ class CompositeTrait {
 
   final String _text;
   final List<Trait> traits;
-  final bool isParsed;
+  final bool isParsingText;
 
   String get rawText => _text;
 
@@ -89,14 +89,14 @@ class CompositeTrait {
   CompositeTrait({List<Trait> traits, bool isParsed})
       : traits = traits ?? [],
         _text = CompositeTrait.generateText(traits),
-        isParsed = isParsed ?? true;
+        isParsingText = isParsed ?? true;
 
   factory CompositeTrait.copyWithTraits(CompositeTrait source,
           {List<Trait> traits, bool isParsed}) =>
-      listEquals(source.traits, traits) && source.isParsed == isParsed
+      listEquals(source.traits, traits) && source.isParsingText == isParsed
           ? source
           : CompositeTrait(
-              isParsed: isParsed ?? source.isParsed, traits: traits ?? []);
+              isParsed: isParsed ?? source.isParsingText, traits: traits ?? []);
 
   ///
   /// Either create a TraitModel given parseable text, or create one from a list
@@ -105,15 +105,15 @@ class CompositeTrait {
   CompositeTrait.fromText({String text, bool isParsed})
       : _text = text ?? '',
         traits = _createTrait(text ?? ''),
-        isParsed = isParsed ?? true;
+        isParsingText = isParsed ?? true;
 
   factory CompositeTrait.copyWithText(CompositeTrait source,
           {String text, bool isParsed}) =>
-      (source.rawText == text && source.isParsed == isParsed)
+      (source.rawText == text && source.isParsingText == isParsed)
           ? source
           : CompositeTrait.fromText(
               text: text ?? source._text,
-              isParsed: isParsed ?? source.isParsed);
+              isParsed: isParsed ?? source.isParsingText);
 
   factory CompositeTrait.remove(CompositeTrait source,
       {ModifierComponents modifier, Trait trait}) {
@@ -138,12 +138,13 @@ class CompositeTrait {
     if (identical(this, other)) return true;
     if (other.runtimeType != this.runtimeType) return false;
     return this.rawText == other.rawText &&
-        this.isParsed == other.isParsed &&
+        this.isParsingText == other.isParsingText &&
         listEquals(traits, other.traits);
   }
 
   @override
-  int get hashCode => rawText.hashCode ^ isParsed.hashCode ^ traits.hashCode;
+  int get hashCode =>
+      rawText.hashCode ^ isParsingText.hashCode ^ traits.hashCode;
 }
 
 List<Trait> _createTrait(String text) {
@@ -157,3 +158,10 @@ List<Trait> _createTrait(String text) {
 
 // TODO update Traits.buildTrait to return a shell trait if the template is not found
 Trait _buildTrait(TraitComponents it) => Traits.buildTrait(it);
+
+class ComponentTrait {
+  final Trait source;
+  final bool isAddingModifier;
+
+  ComponentTrait(this.source, this.isAddingModifier);
+}
