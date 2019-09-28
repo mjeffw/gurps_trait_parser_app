@@ -19,16 +19,10 @@ class TraitScreen extends StatelessWidget {
         children: [
           IndexedStack(
             index: model.isParsingText ? 1 : 0,
-            children: [
-              _TraitTextView(),
-              TraitTextEditor(trait: model),
-            ],
+            children: [_TraitTextView(), TraitTextEditor(trait: model)],
           ),
           IconButton(
-            icon: Icon(
-              model.isParsingText ? Icons.arrow_downward : Icons.arrow_upward,
-              color: Colors.blue,
-            ),
+            icon: Icon(_icon(model), color: Colors.blue),
             iconSize: 48.0,
             onPressed: () => _toggleParsing(context, model),
           ),
@@ -38,50 +32,51 @@ class TraitScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _traitComponents(BuildContext context, CompositeTrait model) {
-    return _hasTraits(model)
-        ? [
-            Divider(),
-            Flexible(
-              child: ListView.builder(
-                itemCount: model.traits.length,
-                itemBuilder: (context, index) => _TraitCard(index),
+  IconData _icon(CompositeTrait model) =>
+      model.isParsingText ? Icons.arrow_downward : Icons.arrow_upward;
+
+  List<Widget> _traitComponents(BuildContext context, CompositeTrait model) =>
+      _hasTraits(model)
+          ? [
+              Divider(),
+              Flexible(
+                child: ListView.builder(
+                  itemCount: model.traits.length,
+                  itemBuilder: (context, index) => ModelBinding(
+                      child: _TraitCard(), initialModel: model.traits[index]),
+                ),
               ),
-            )
-          ]
-        : [];
-  }
+            ]
+          : [];
 
   bool _hasTraits(CompositeTrait model) =>
       model.traits != null && model.traits.isNotEmpty;
 
-  _toggleParsing(BuildContext context, CompositeTrait model) {
-    ModelBinding.update(context,
-        CompositeTrait.copyWithText(model, isParsed: !model.isParsingText));
-  }
+  void _toggleParsing(BuildContext context, CompositeTrait model) =>
+      ModelBinding.update(context,
+          CompositeTrait.copyWithText(model, isParsed: !model.isParsingText));
 }
 
 class _TraitTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final CompositeTrait model = ModelBinding.of(context);
+    final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
+
     final parsedText = model.parsedText;
     final TextEditingController controller =
         TextEditingController(text: parsedText);
+
     return buildTextField(controller: controller, enabled: false);
   }
 }
 
 class _TraitCard extends StatelessWidget {
-  final int index;
-
-  _TraitCard(this.index);
-
   @override
   Widget build(BuildContext context) {
-    final CompositeTrait model = ModelBinding.of(context);
+    final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
+    final Trait trait = ModelBinding.of<Trait>(context);
+
     final focused = !model.isParsingText;
-    final trait = model.traits[index];
     final detail =
         '${trait.nameAndLevel} (${trait.specialization ?? ""}) [${trait.baseCost ?? 0}]';
 
@@ -93,10 +88,6 @@ class _TraitCard extends StatelessWidget {
             title: Text(trait.reference ?? ''),
             subtitle: Text('$detail\nModifier Total: ${trait.modifierTotal}%'),
             isThreeLine: true,
-            leading: IconButton(
-              icon: Icon(Icons.keyboard_arrow_down),
-              onPressed: () {},
-            ),
             trailing: Column(
               children: <Widget>[
                 Text('Total Cost', style: smallLabelStyle),
@@ -109,19 +100,14 @@ class _TraitCard extends StatelessWidget {
             children: [
               if (!model.isParsingText)
                 IconButton(
-                  onPressed: () {
-                    _addEnhancement(model, trait);
-                  },
-                  icon: Icon(
-                    Icons.add_circle,
-                    color: Colors.blue,
-                  ),
+                  onPressed: () => _addEnhancement(model, trait),
+                  icon: Icon(Icons.add_circle, color: Colors.blue),
                 ),
               Divider(),
             ],
           ),
           //   if (isAddingModifier) _addModifierWidget(context, trait);
-          ...?_buildAllModifierWidgets(context, trait, focused),
+          ...?_buildAllModifierWidgets(trait),
         ],
       ),
     );
@@ -130,10 +116,9 @@ class _TraitCard extends StatelessWidget {
   ShapeBorder _selectBorder(BuildContext context, bool focused) =>
       focused ? focusedBorder : Theme.of(context).cardTheme.shape;
 
-  List<Widget> _buildAllModifierWidgets(
-      BuildContext context, Trait trait, bool focused) {
+  List<Widget> _buildAllModifierWidgets(Trait trait) {
     return trait.modifiers
-        .map((it) => ModifierListTile(trait: trait, modifier: it))
+        .map((it) => ModelBinding(initialModel: it, child: ModifierListTile()))
         .toList();
   }
 
@@ -143,18 +128,11 @@ class _TraitCard extends StatelessWidget {
 }
 
 class ModifierListTile extends StatelessWidget {
-  const ModifierListTile({
-    Key key,
-    @required this.trait,
-    @required this.modifier,
-  }) : super(key: key);
-
-  final Trait trait;
-  final ModifierComponents modifier;
-
   @override
   Widget build(BuildContext context) {
-    final CompositeTrait model = ModelBinding.of(context);
+    final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
+    final Trait trait = ModelBinding.of<Trait>(context);
+    final Modifier modifier = ModelBinding.of<Modifier>(context);
     final focused = !model.isParsingText;
 
     final data = '${modifier.detail.isEmpty ? "" : modifier.detail + ", "}'
@@ -184,10 +162,8 @@ class ModifierListTile extends StatelessWidget {
           icon: Icons.delete,
           closeOnTap: true,
           onTap: () {
-            ModelBinding.update(
-              context,
-              CompositeTrait.remove(model, trait: trait, modifier: modifier),
-            );
+            ModelBinding.update(context,
+                CompositeTrait.remove(model, trait: trait, modifier: modifier));
           },
         ),
       ],

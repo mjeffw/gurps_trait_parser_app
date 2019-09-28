@@ -70,6 +70,25 @@ class _ModelBindingScope<T> extends InheritedWidget {
 
 Parser parser = Parser();
 
+class TraitDelegate extends Trait {
+  final Trait trait;
+
+  TraitDelegate({this.trait});
+
+  List<Modifier> get modifiers => trait.modifiers;
+
+  String get reference => trait.reference;
+  String get description => trait.description;
+  String get nameAndLevel => trait.nameAndLevel;
+  String get specialization => trait.specialization;
+  int get cost => trait.cost;
+  int get baseCost => trait.baseCost;
+  int get modifierTotal => trait.modifierTotal;
+
+  Trait copyWith({List<Modifier> modifiers}) =>
+      TraitDelegate(trait: trait.copyWith(modifiers: modifiers));
+}
+
 class CompositeTrait {
   static String generateText(List<Trait> traits) =>
       traits.map((it) => it.description).join(' + ');
@@ -116,16 +135,14 @@ class CompositeTrait {
               isParsed: isParsed ?? source.isParsingText);
 
   factory CompositeTrait.remove(CompositeTrait source,
-      {ModifierComponents modifier, Trait trait}) {
+      {Modifier modifier, Trait trait}) {
+    List<Modifier> mods = [];
+    mods.addAll(trait.modifiers);
+    mods.remove(modifier);
+
     List<Trait> traits = [];
     traits.addAll(source.traits);
     int index = traits.indexOf(trait);
-
-    List<ModifierComponents> mods = []; // create temporary list
-    mods.addAll(
-        trait.modifiers); // copy all elements of trait.modifiers into temp list
-    mods.remove(modifier); // remove the target modifier from temp list
-
     traits[index] = trait.copyWith(modifiers: mods);
 
     CompositeTrait model =
@@ -157,11 +174,5 @@ List<Trait> _createTrait(String text) {
 }
 
 // TODO update Traits.buildTrait to return a shell trait if the template is not found
-Trait _buildTrait(TraitComponents it) => Traits.buildTrait(it);
-
-class ComponentTrait {
-  final Trait source;
-  final bool isAddingModifier;
-
-  ComponentTrait(this.source, this.isAddingModifier);
-}
+TraitDelegate _buildTrait(TraitComponents it) =>
+    TraitDelegate(trait: Traits.buildTrait(it));

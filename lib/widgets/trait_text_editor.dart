@@ -64,8 +64,8 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
         CompositeTrait.copyWithText(widget.trait, text: _textController.text);
     ModelBinding.update(context, traitModel);
 
-    if (_textController.text != traitModel.rawText && traitModel.isParsingText) {
-      print('handle update');
+    if (_textController.text != traitModel.rawText &&
+        traitModel.isParsingText) {
       _textController.text = traitModel.rawText;
     }
   }
