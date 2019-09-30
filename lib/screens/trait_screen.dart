@@ -26,7 +26,14 @@ class TraitScreen extends StatelessWidget {
             iconSize: 48.0,
             onPressed: () => _toggleParsing(context, model),
           ),
-          ..._traitComponents(context, model),
+          Divider(),
+          if (_hasTraits(model))
+            Flexible(
+              child: ListView.builder(
+                itemCount: model.traits.length,
+                itemBuilder: (context, index) => _TraitCard(index: index),
+              ),
+            ),
         ],
       ),
     );
@@ -34,20 +41,6 @@ class TraitScreen extends StatelessWidget {
 
   IconData _icon(CompositeTrait model) =>
       model.isParsingText ? Icons.arrow_downward : Icons.arrow_upward;
-
-  List<Widget> _traitComponents(BuildContext context, CompositeTrait model) =>
-      _hasTraits(model)
-          ? [
-              Divider(),
-              Flexible(
-                child: ListView.builder(
-                  itemCount: model.traits.length,
-                  itemBuilder: (context, index) => ModelBinding(
-                      child: _TraitCard(), initialModel: model.traits[index]),
-                ),
-              ),
-            ]
-          : [];
 
   bool _hasTraits(CompositeTrait model) =>
       model.traits != null && model.traits.isNotEmpty;
@@ -61,21 +54,24 @@ class _TraitTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
-
     final parsedText = model.parsedText;
     final TextEditingController controller =
         TextEditingController(text: parsedText);
-
+    print('_TraitTextView.build (${parsedText})');
     return buildTextField(controller: controller, enabled: false);
   }
 }
 
 class _TraitCard extends StatelessWidget {
+  final int index;
+
+  _TraitCard({Key key, this.index}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
-    final Trait trait = ModelBinding.of<Trait>(context);
-
+    final Trait trait = model.traits[index];
+    final bool isAddingModifier = model.isAddingModifier;
     final focused = !model.isParsingText;
     final detail =
         '${trait.nameAndLevel} (${trait.specialization ?? ""}) [${trait.baseCost ?? 0}]';
@@ -100,13 +96,13 @@ class _TraitCard extends StatelessWidget {
             children: [
               if (!model.isParsingText)
                 IconButton(
-                  onPressed: () => _addEnhancement(model, trait),
+                  onPressed: () => _addEnhancement(context, model),
                   icon: Icon(Icons.add_circle, color: Colors.blue),
                 ),
               Divider(),
             ],
           ),
-          //   if (isAddingModifier) _addModifierWidget(context, trait);
+          // if (isAddingModifier) _addModifierEditor(context, trait);
           ...?_buildAllModifierWidgets(trait),
         ],
       ),
@@ -116,25 +112,30 @@ class _TraitCard extends StatelessWidget {
   ShapeBorder _selectBorder(BuildContext context, bool focused) =>
       focused ? focusedBorder : Theme.of(context).cardTheme.shape;
 
-  List<Widget> _buildAllModifierWidgets(Trait trait) {
-    return trait.modifiers
-        .map((it) => ModelBinding(initialModel: it, child: ModifierListTile()))
-        .toList();
+  List<Widget> _buildAllModifierWidgets(Trait trait) => trait.modifiers
+      .map((it) => ModifierListTile(trait: trait, modifier: it))
+      .toList();
+
+  void _addModifierEditor(CompositeTrait model, Trait trait) {
+    // display add enhancement dialog
   }
 
-  void _addEnhancement(CompositeTrait model, Trait trait) {
-    // display add enhancement dialog
+  void _addEnhancement(BuildContext context, CompositeTrait model) {
+    ModelBinding.update(context,
+        CompositeTrait.copyWithAddingModifier(model, isAddingModifier: true));
   }
 }
 
 class ModifierListTile extends StatelessWidget {
+  final Modifier modifier;
+  final Trait trait;
+
+  ModifierListTile({Key key, this.trait, this.modifier}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
-    final Trait trait = ModelBinding.of<Trait>(context);
-    final Modifier modifier = ModelBinding.of<Modifier>(context);
     final focused = !model.isParsingText;
-
     final data = '${modifier.detail.isEmpty ? "" : modifier.detail + ", "}'
         '${modifier.value < 0 ? modifier.value : "+" + modifier.value.toString()}%';
 

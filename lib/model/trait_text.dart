@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gurps_traits/gurps_traits.dart';
+import 'package:quiver/core.dart';
 
 class ModelBinding<T> extends StatefulWidget {
   ModelBinding({
@@ -85,8 +86,15 @@ class TraitDelegate extends Trait {
   int get baseCost => trait.baseCost;
   int get modifierTotal => trait.modifierTotal;
 
+  @override
   Trait copyWith({List<Modifier> modifiers}) =>
       TraitDelegate(trait: trait.copyWith(modifiers: modifiers));
+
+  bool operator ==(dynamic other) =>
+      other is TraitDelegate && this.trait == other.trait;
+
+  @override
+  int get hashCode => trait.hashCode;
 }
 
 class CompositeTrait {
@@ -96,6 +104,7 @@ class CompositeTrait {
   final String _text;
   final List<Trait> traits;
   final bool isParsingText;
+  final bool isAddingModifier;
 
   String get rawText => _text;
 
@@ -105,10 +114,11 @@ class CompositeTrait {
   /// Either create a TraitModel given parseable text, or create one from a list
   /// of traits. You cannot do both.
   ///
-  CompositeTrait({List<Trait> traits, bool isParsed})
+  CompositeTrait({List<Trait> traits, bool isParsed, bool isAddingModifier})
       : traits = traits ?? [],
         _text = CompositeTrait.generateText(traits),
-        isParsingText = isParsed ?? true;
+        isParsingText = isParsed ?? true,
+        isAddingModifier = isAddingModifier ?? false;
 
   factory CompositeTrait.copyWithTraits(CompositeTrait source,
           {List<Trait> traits, bool isParsed}) =>
@@ -121,8 +131,9 @@ class CompositeTrait {
   /// Either create a TraitModel given parseable text, or create one from a list
   /// of traits. You cannot do both.
   ///
-  CompositeTrait.fromText({String text, bool isParsed})
+  CompositeTrait.fromText({String text, bool isParsed, bool isAddingModifier})
       : _text = text ?? '',
+        isAddingModifier = isAddingModifier ?? false,
         traits = _createTrait(text ?? ''),
         isParsingText = isParsed ?? true;
 
@@ -136,12 +147,10 @@ class CompositeTrait {
 
   factory CompositeTrait.remove(CompositeTrait source,
       {Modifier modifier, Trait trait}) {
-    List<Modifier> mods = [];
-    mods.addAll(trait.modifiers);
+    List<Modifier> mods = List.from(trait.modifiers, growable: true);
     mods.remove(modifier);
 
-    List<Trait> traits = [];
-    traits.addAll(source.traits);
+    List<Trait> traits = List.from(source.traits);
     int index = traits.indexOf(trait);
     traits[index] = trait.copyWith(modifiers: mods);
 
@@ -150,18 +159,26 @@ class CompositeTrait {
     return model;
   }
 
+  factory CompositeTrait.copyWithAddingModifier(CompositeTrait model,
+      {bool isAddingModifier}) {
+    return CompositeTrait(
+        traits: model.traits,
+        isAddingModifier: isAddingModifier ?? false,
+        isParsed: model.isParsingText);
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != this.runtimeType) return false;
     return this.rawText == other.rawText &&
         this.isParsingText == other.isParsingText &&
+        this.isAddingModifier == other.isAddingModifier &&
         listEquals(traits, other.traits);
   }
 
   @override
-  int get hashCode =>
-      rawText.hashCode ^ isParsingText.hashCode ^ traits.hashCode;
+  int get hashCode => hash4(rawText, isParsingText, isAddingModifier, traits);
 }
 
 List<Trait> _createTrait(String text) {
