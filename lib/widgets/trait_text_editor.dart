@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../model/trait_text.dart';
-
-TextField buildTextField({TextEditingController controller, bool enabled}) {
-  return TextField(
-    enabled: enabled,
-    maxLines: 5,
-    controller: controller,
-    decoration: InputDecoration(
-        helperText: 'Use canonical form: Name {Level} (Parenthetical-Notes).',
-        labelText: 'Trait Description'),
-  );
-}
+import '../util/widget_util.dart';
 
 // TODO make TextEditingController the 'single source of truth' when parsing,
 // TODO make CompositeTrait.rawText the 'SSOT' when editing with widgets.
@@ -78,6 +68,9 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return buildTextField(controller: _textController, enabled: true);
+    return buildTextField(
+        controller: _textController,
+        enabled: true,
+        helperText: 'Use canonical form: Name {Level} (Parenthetical-Notes).');
   }
 }

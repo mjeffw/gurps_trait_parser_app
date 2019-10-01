@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:gurps_trait_parser_app/theme.dart';
 import 'package:gurps_traits/gurps_traits.dart';
 
 import '../model/trait_text.dart';
+import '../theme.dart';
+import '../util/widget_util.dart';
+import '../widgets/add_modifier_widget.dart';
 import '../widgets/trait_text_editor.dart';
 
 class TraitScreen extends StatelessWidget {
@@ -54,7 +56,10 @@ class _TraitTextView extends StatelessWidget {
     final TextEditingController controller =
         TextEditingController(text: parsedText);
     print('_TraitTextView.build (${parsedText})');
-    return buildTextField(controller: controller, enabled: false);
+    return buildTextField(
+        controller: controller,
+        enabled: false,
+        helperText: 'Use canonical form: Name {Level} (Parenthetical-Notes).');
   }
 }
 
@@ -119,37 +124,7 @@ class _TraitCard extends StatelessWidget {
 
   Widget _addModifierEditor(
       BuildContext context, CompositeTrait model, Trait trait) {
-    return Card(
-      borderOnForeground: false,
-      elevation: 0.0,
-      child: Column(
-        children: <Widget>[
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey[400],
-                  offset: const Offset(0.0, 0.0),
-                ),
-                BoxShadow(
-                  color: Colors.grey[100],
-                  offset: const Offset(0.0, 0.0),
-                  spreadRadius: -0.5,
-                  blurRadius: 4.0,
-                ),
-              ],
-            ),
-            child: Column(
-              children: <Widget>[
-                TextField(),
-                TextField(),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
+    return AddModifierWidget();
   }
 
   void _addEnhancement(BuildContext context, CompositeTrait model) {
