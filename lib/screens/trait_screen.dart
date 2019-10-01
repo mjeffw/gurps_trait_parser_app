@@ -23,17 +23,16 @@ class TraitScreen extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(_icon(model), color: Colors.blue),
-            iconSize: 48.0,
+            iconSize: 36.0,
             onPressed: () => _toggleParsing(context, model),
           ),
           Divider(),
-          if (_hasTraits(model))
-            Flexible(
-              child: ListView.builder(
-                itemCount: model.traits.length,
-                itemBuilder: (context, index) => _TraitCard(index: index),
-              ),
+          Flexible(
+            child: ListView.builder(
+              itemCount: model.traits.length,
+              itemBuilder: (context, index) => _TraitCard(index: index),
             ),
+          ),
         ],
       ),
     );
@@ -41,9 +40,6 @@ class TraitScreen extends StatelessWidget {
 
   IconData _icon(CompositeTrait model) =>
       model.isParsingText ? Icons.arrow_downward : Icons.arrow_upward;
-
-  bool _hasTraits(CompositeTrait model) =>
-      model.traits != null && model.traits.isNotEmpty;
 
   void _toggleParsing(BuildContext context, CompositeTrait model) =>
       ModelBinding.update(context,
@@ -73,8 +69,9 @@ class _TraitCard extends StatelessWidget {
     final Trait trait = model.traits[index];
     final bool isAddingModifier = model.isAddingModifier;
     final focused = !model.isParsingText;
-    final detail =
-        '${trait.nameAndLevel} (${trait.specialization ?? ""}) [${trait.baseCost ?? 0}]';
+    final detail = '${trait.nameAndLevel}'
+        '${trait.specialization == null ? "" : " (" + trait.specialization + ")"}'
+        ' [${trait.baseCost ?? 0}]';
 
     return Card(
       shape: _selectBorder(context, focused),
@@ -102,8 +99,8 @@ class _TraitCard extends StatelessWidget {
               Divider(),
             ],
           ),
-          // if (isAddingModifier) _addModifierEditor(context, trait);
-          ...?_buildAllModifierWidgets(trait),
+          if (isAddingModifier) _addModifierEditor(context, model, trait),
+          ...?_buildAllModifierWidgets(context, trait),
         ],
       ),
     );
@@ -112,12 +109,47 @@ class _TraitCard extends StatelessWidget {
   ShapeBorder _selectBorder(BuildContext context, bool focused) =>
       focused ? focusedBorder : Theme.of(context).cardTheme.shape;
 
-  List<Widget> _buildAllModifierWidgets(Trait trait) => trait.modifiers
-      .map((it) => ModifierListTile(trait: trait, modifier: it))
-      .toList();
+  List<Widget> _buildAllModifierWidgets(BuildContext context, Trait trait) {
+    List<Widget> widgets = [];
+    widgets = trait.modifiers
+        .map((it) => ModifierListTile(trait: trait, modifier: it))
+        .toList();
+    return ListTile.divideTiles(context: context, tiles: widgets).toList();
+  }
 
-  void _addModifierEditor(CompositeTrait model, Trait trait) {
-    // display add enhancement dialog
+  Widget _addModifierEditor(
+      BuildContext context, CompositeTrait model, Trait trait) {
+    return Card(
+      borderOnForeground: false,
+      elevation: 0.0,
+      child: Column(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey[400],
+                  offset: const Offset(0.0, 0.0),
+                ),
+                BoxShadow(
+                  color: Colors.grey[100],
+                  offset: const Offset(0.0, 0.0),
+                  spreadRadius: -0.5,
+                  blurRadius: 4.0,
+                ),
+              ],
+            ),
+            child: Column(
+              children: <Widget>[
+                TextField(),
+                TextField(),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   void _addEnhancement(BuildContext context, CompositeTrait model) {
