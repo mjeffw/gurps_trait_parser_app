@@ -14,21 +14,22 @@ class ModelBinding<T> extends StatefulWidget {
   final T initialModel;
   final Widget child;
 
+  @override
   _ModelBindingState createState() => _ModelBindingState<T>();
 
-  static Type _typeOf<T>() => T;
+  //static Type _typeOf<T>() => T;
 
   static T of<T>(BuildContext context) {
-    final Type scopeType = _typeOf<_ModelBindingScope<T>>();
-    final _ModelBindingScope<T> scope =
-        context.inheritFromWidgetOfExactType(scopeType);
+    //final scopeType = _typeOf<_ModelBindingScope<T>>();
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<_ModelBindingScope<T>>();
     return scope.modelBindingState.currentModel;
   }
 
   static void update<T>(BuildContext context, T newModel) {
-    final Type scopeType = _typeOf<_ModelBindingScope<T>>();
+    //final scopeType = _typeOf<_ModelBindingScope<T>>();
     final _ModelBindingScope<dynamic> scope =
-        context.inheritFromWidgetOfExactType(scopeType);
+        context.dependOnInheritedWidgetOfExactType<_ModelBindingScope<T>>();
     scope.modelBindingState.updateModel(newModel);
   }
 }
@@ -76,22 +77,31 @@ class TraitDelegate extends Trait {
 
   TraitDelegate({this.trait});
 
+  @override
   List<Modifier> get modifiers => trait.modifiers;
 
+  @override
   String get reference => trait.reference;
+  @override
   String get description => trait.description;
+  @override
   String get nameAndLevel => trait.nameAndLevel;
+  @override
   String get specialization => trait.specialization;
+  @override
   int get cost => trait.cost;
+  @override
   int get baseCost => trait.baseCost;
+  @override
   int get modifierTotal => trait.modifierTotal;
 
   @override
   Trait copyWith({List<Modifier> modifiers}) =>
       TraitDelegate(trait: trait.copyWith(modifiers: modifiers));
 
+  @override
   bool operator ==(dynamic other) =>
-      other is TraitDelegate && this.trait == other.trait;
+      other is TraitDelegate && trait == other.trait;
 
   @override
   int get hashCode => trait.hashCode;
@@ -147,15 +157,14 @@ class CompositeTrait {
 
   factory CompositeTrait.remove(CompositeTrait source,
       {Modifier modifier, Trait trait}) {
-    List<Modifier> mods = List.from(trait.modifiers, growable: true);
+    var mods = List.from(trait.modifiers, growable: true);
     mods.remove(modifier);
 
-    List<Trait> traits = List.from(source.traits);
-    int index = traits.indexOf(trait);
+    var traits = List.from(source.traits);
+    var index = traits.indexOf(trait);
     traits[index] = trait.copyWith(modifiers: mods);
 
-    CompositeTrait model =
-        CompositeTrait.copyWithTraits(source, traits: traits);
+    var model = CompositeTrait.copyWithTraits(source, traits: traits);
     return model;
   }
 
@@ -170,10 +179,10 @@ class CompositeTrait {
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
-    if (other.runtimeType != this.runtimeType) return false;
-    return this.rawText == other.rawText &&
-        this.isParsingText == other.isParsingText &&
-        this.isAddingModifier == other.isAddingModifier &&
+    if (other.runtimeType != runtimeType) return false;
+    return rawText == other.rawText &&
+        isParsingText == other.isParsingText &&
+        isAddingModifier == other.isAddingModifier &&
         listEquals(traits, other.traits);
   }
 
@@ -183,7 +192,7 @@ class CompositeTrait {
 
 List<Trait> _createTrait(String text) {
   try {
-    List<TraitComponents> components = Parser().parse(text);
+    var components = Parser().parse(text);
     return components.map((it) => _buildTrait(it)).toList();
   } catch (exc) {
     return [];

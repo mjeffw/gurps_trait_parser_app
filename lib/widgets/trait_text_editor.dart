@@ -22,7 +22,7 @@ class TraitTextEditor extends StatefulWidget {
 /// State.
 ///
 class _TraitTextEditorState extends State<TraitTextEditor> {
-  TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
 
   _TraitTextEditorState();
 
@@ -36,7 +36,7 @@ class _TraitTextEditorState extends State<TraitTextEditor> {
   @override
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    TraitTextEditor oldEditor = oldWidget as TraitTextEditor;
+    final oldEditor = oldWidget as TraitTextEditor;
     if (oldEditor.trait.isParsingText != widget.trait.isParsingText) {
       if (widget.trait.isParsingText) {
         print('${widget.trait.parsedText}');

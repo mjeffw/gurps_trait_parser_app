@@ -9,11 +9,11 @@ import '../widgets/add_modifier_widget.dart';
 import '../widgets/trait_text_editor.dart';
 
 class TraitScreen extends StatelessWidget {
-  static const String id = "trait_screen";
+  static const String id = 'trait_screen';
 
   @override
   Widget build(BuildContext context) {
-    final CompositeTrait model = ModelBinding.of(context);
+    final model = ModelBinding.of(context);
 
     return Container(
       padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
@@ -51,10 +51,9 @@ class TraitScreen extends StatelessWidget {
 class _TraitTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
+    final model = ModelBinding.of<CompositeTrait>(context);
     final parsedText = model.parsedText;
-    final TextEditingController controller =
-        TextEditingController(text: parsedText);
+    final controller = TextEditingController(text: parsedText);
     print('_TraitTextView.build (${parsedText})');
     return buildTextField(
         controller: controller,
@@ -70,9 +69,9 @@ class _TraitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
-    final Trait trait = model.traits[index];
-    final bool isAddingModifier = model.isAddingModifier;
+    final model = ModelBinding.of<CompositeTrait>(context);
+    final trait = model.traits[index];
+    final isAddingModifier = model.isAddingModifier;
     final focused = !model.isParsingText;
     final detail = '${trait.nameAndLevel}'
         '${trait.specialization == null ? "" : " (" + trait.specialization + ")"}'
@@ -115,8 +114,7 @@ class _TraitCard extends StatelessWidget {
       focused ? focusedBorder : Theme.of(context).cardTheme.shape;
 
   List<Widget> _buildAllModifierWidgets(BuildContext context, Trait trait) {
-    List<Widget> widgets = [];
-    widgets = trait.modifiers
+    var widgets = trait.modifiers
         .map((it) => ModifierListTile(trait: trait, modifier: it))
         .toList();
     return ListTile.divideTiles(context: context, tiles: widgets).toList();
@@ -141,7 +139,7 @@ class ModifierListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CompositeTrait model = ModelBinding.of<CompositeTrait>(context);
+    final model = ModelBinding.of<CompositeTrait>(context);
     final focused = !model.isParsingText;
     final data = '${modifier.detail.isEmpty ? "" : modifier.detail + ", "}'
         '${modifier.value < 0 ? modifier.value : "+" + modifier.value.toString()}%';
